@@ -570,9 +570,15 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
-        x,y = state
 
         "*** YOUR CODE HERE ***"
+        # find greedily the closest dot to eat (= goal)
+        distance, goal = min([(util.manhattanDistance(state, goal), goal) for goal in self.food.asList()])
+        if state == goal:
+            return True
+        else:
+            return False
+
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
