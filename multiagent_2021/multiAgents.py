@@ -73,16 +73,8 @@ class ReflexAgent(Agent):
         newGhostStates = childGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE Q1 ***"
-        food_list = childGameState.getFood().asList()
-        Food = float("inf")
-        for food in food_list:
-            Food = min(Food, manhattanDistance(newPos, food))
-
-        for ghost_pos in childGameState.getGhostPositions():
-            if manhattanDistance(newPos, ghost_pos) < 2:
-                return -float('inf')
-        return childGameState.getScore() + (1.0 / Food)
+        "*** YOUR CODE HERE ***"
+        return childGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -141,35 +133,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         gameState.isLose():
         Returns whether or not the game state is a losing state
-        """ 
-        "*** YOUR CODE HERE Q2 ***"
-        return self.max_value(gameState, 0, 0)[0]
-        
-    def min_value(self, gameState, agentIndex, depth):
-        best_action = ("min", float("inf"))
-        for action in gameState.getLegalActions(agentIndex):
-            success_action = (action, self.min_max(gameState.getNextState(agentIndex, action),
-                                                   (depth + 1) % gameState.getNumAgents(), depth + 1))
-            best_action = min(best_action, success_action, key=lambda x: x[1])
-        return best_action
-
-    def min_max(self, gameState, agentIndex, depth):
-        if depth == self.depth * gameState.getNumAgents() \
-                or gameState.isLose() or gameState.isWin():
-            return self.evaluationFunction(gameState)
-        if agentIndex == 0:
-            return self.max_value(gameState, agentIndex, depth)[1]
-        else:
-            return self.min_value(gameState, agentIndex, depth)[1]
-
-    def max_value(self, gameState, agentIndex, depth):
-        best_action = ("max", -float("inf"))
-        for action in gameState.getLegalActions(agentIndex):
-            success_action = (action, self.min_max(gameState.getNextState(agentIndex, action),
-                                                   (depth + 1) % gameState.getNumAgents(), depth + 1))
-            best_action = max(best_action, success_action, key=lambda x: x[1])
-        return best_action
-
+        """
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -180,41 +146,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE Q3 ***"
-        return self.max_value(gameState, 0, 0, -float("inf"), float("inf"))[0]
-
-    def min_value(self, gameState, agentIndex, depth, alpha, beta):
-        best_action = ("min", float("inf"))
-        for action in gameState.getLegalActions(agentIndex):
-            success_action = (action, self.alpha_beta(gameState.getNextState(agentIndex, action),
-                                                      (depth + 1) % gameState.getNumAgents(), depth + 1, alpha, beta))
-            best_action = min(best_action, success_action, key=lambda x: x[1])
-            if best_action[1] < alpha:
-                return best_action
-            else:
-                beta = min(beta, best_action[1])
-        return best_action
-
-    def alpha_beta(self, gameState, agentIndex, depth, alpha, beta):
-        if depth is self.depth * gameState.getNumAgents() \
-                or gameState.isLose() or gameState.isWin():
-            return self.evaluationFunction(gameState)
-        if agentIndex is 0:
-            return self.max_value(gameState, agentIndex, depth, alpha, beta)[1]
-        else:
-            return self.min_value(gameState, agentIndex, depth, alpha, beta)[1]
-
-    def max_value(self, gameState, agentIndex, depth, alpha, beta):
-        best_action = ("max", -float("inf"))
-        for action in gameState.getLegalActions(agentIndex):
-            success_action = (action, self.alpha_beta(gameState.getNextState(agentIndex, action),
-                                                      (depth + 1) % gameState.getNumAgents(), depth + 1, alpha, beta))
-            best_action = max(best_action, success_action, key=lambda x: x[1])
-            if best_action[1] > beta:
-                return best_action
-            else:
-                alpha = max(alpha, best_action[1])
-        return best_action
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -228,44 +161,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        "*** YOUR CODE HERE Q4 ***"
-        max_depth = self.depth * gameState.getNumAgents()
-        return self.expect_i_max(gameState, "expect", max_depth, 0)[0]
-
-    def max_value(self, gameState, action, depth, agentIndex):
-        best_action = ("max", -(float('inf')))
-        legal_actions = gameState.getLegalActions(agentIndex)
-        for legal_action in legal_actions:
-            next_agent = (agentIndex + 1) % gameState.getNumAgents()
-            success_action = None
-            if depth != self.depth * gameState.getNumAgents():
-                success_action = action
-            else:
-                success_action = legal_action
-            success_value = self.expect_i_max(gameState.getNextState(agentIndex, legal_action),
-                                              success_action, depth - 1, next_agent)
-            best_action = max(best_action, success_value, key=lambda x: x[1])
-        return best_action
-
-    def expect_value(self, gameState, action, depth, agentIndex):
-        legal_actions = gameState.getLegalActions(agentIndex)
-        average_score = 0
-        prop = 1.0 / len(legal_actions)
-        for legal_action in legal_actions:
-            next_agent = (agentIndex + 1) % gameState.getNumAgents()
-            best_action = self.expect_i_max(gameState.getNextState(agentIndex, legal_action),
-                                            action, depth - 1, next_agent)
-            average_score += best_action[1] * prop
-        return action, average_score
-
-    def expect_i_max(self, gameState, action, depth, agentIndex):
-
-        if depth == 0 or gameState.isLose() or gameState.isWin():
-            return action, self.evaluationFunction(gameState)
-        if agentIndex is 0:
-            return self.max_value(gameState, action, depth, agentIndex)
-        else:
-            return self.expect_value(gameState, action, depth, agentIndex)
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -274,39 +171,8 @@ def betterEvaluationFunction(currentGameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE Q5 ***"
-    
-    food_left = currentGameState.getNumFood()
-    capsules_left = len(currentGameState.getCapsules())
-
-    food_left_M = 950000
-    capsules_left_M = 10000
-    food_distance_M = 1000
-
-    added_factors = 0
-    if currentGameState.isLose():
-        added_factors -= 50000
-    elif currentGameState.isWin():
-        added_factors += 50000
-
-    new_position = currentGameState.getPacmanPosition()
-    food_list = currentGameState.getFood().asList()
-
-    Food = float('inf')
-    for food in food_list:
-        Food = min(Food, manhattanDistance(new_position, food))
-
-    ghost_distance = 0
-    for ghost in currentGameState.getGhostPositions():
-        ghost_distance = manhattanDistance(new_position, ghost)
-        if ghost_distance < 2:
-            return -float('inf')
-
-    eval = 1.0 / (food_left + 1) * food_left_M + ghost_distance
-    eval += 1.0 / (Food + 1) * food_distance_M
-    eval += 1.0 / (capsules_left + 1) * capsules_left_M + added_factors
-
-    return eval
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
